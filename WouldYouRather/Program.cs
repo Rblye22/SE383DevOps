@@ -1,3 +1,5 @@
+using MySqlConnector;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -23,7 +25,8 @@ app.UseAuthorization();
 app.MapRazorPages();
 
 
-QuestionsDatabase db = new QuestionsDatabase();
+string connectionString = builder.Configuration.GetConnectionString("AivenDb");
+QuestionsDatabase db = new QuestionsDatabase(connectionString);
 
 app.MapGet("/api/questions/random", () =>
 {
@@ -58,48 +61,75 @@ public class Question
     public double PercentA { get; set; }
     public double PercentB { get; set; }
 
-    public Question(int id, string optionA, string optionB)
-    {
-        Id = id;
-        OptionA = optionA;
-        OptionB = optionB;
-    }
 }
 public class QuestionsDatabase
 {
-    private List<Question> questions = new List<Question>
+    private string connectionString;
+    public QuestionsDatabase(string connectionString)
     {
-        new Question(1, "Have the ability to fly", "Have the ability to become invisible"),
-        new Question(2, "Always be 10 minutes late", "Always be 20 minutes early"),
-        new Question(3, "Give up pizza forever", "Give up burgers forever"),
-        new Question(4, "Fight one horse-sized duck", "Fight 100 duck-sized horses"),
-        new Question(5, "Have unlimited pancakes", "Have unlimited waffles")
-    };
+        this.connectionString = connectionString;
+    }
     public List<Question> GetAllQuestions()
     {
+        List<Question> questions = new List<Question>();
+        MySqlConnection connection = new MySqlConnection(connectionString);
+        connection.Open();
+        MySqlCommand command = new MySqlCommand("SELECT * FROM Questions", connection);
+        MySqlDataReader reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            questions.Add(ReadQuestion(reader));
+        }
+        connection.Close();
         return questions;
     }
     public Question GetRandomQuestion()
     {
-        Random rnd = new Random();
-        return questions[rnd.Next(questions.Count)];
+        MySqlConnection connection = new MySqlConnection(connectionString);
+        connection.Open();
+        MySqlCommand command = new MySqlCommand("SELECT * FROM Questions ORDER BY RAND() LIMIT 1", connection);
+        MySqlDataReader reader = command.ExecuteReader();
+
+        Question question = null;
+        if (reader.Read())
+        {
+            question = ReadQuestion(reader);
+        }
+        connection.Close();
+        return question;
     }
     public void AddVote(int questionId, string choice)
     {
-        foreach (Question q in questions)
-        {
-            if (q.Id == questionId)
-            {
-                if (choice == "A") q.VotesA++;
-                if (choice == "B") q.VotesB++;
+        MySqlConnection connection = new MySqlConnection(connectionString);
+        connection.Open();
 
-                int total = q.VotesA + q.VotesB;
-                if (total > 0)
-                {
-                    q.PercentA = Math.Round((double)q.VotesA / total * 100, 1);
-                    q.PercentB = Math.Round((double)q.VotesB / total * 100, 1);
-                }
-            }
+        string sql = "UPDATE Questions SET VotesA = VotesA + 1 WHERE Id = @id";
+        if (choice == "B")
+        {
+            sql = "UPDATE Questions SET VotesB = VotesB + 1 WHERE Id = @id";
         }
+
+        MySqlCommand command = new MySqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@id", questionId);
+        command.ExecuteNonQuery();
+        connection.Close();
+    }
+    private Question ReadQuestion(MySqlDataReader reader)
+    {
+        Question q = new Question();
+        q.Id = reader.GetInt32("Id");
+        q.OptionA = reader.GetString("OptionA");
+        q.OptionB = reader.GetString("OptionB");
+        q.VotesA = reader.GetInt32("VotesA");
+        q.VotesB = reader.GetInt32("VotesB");
+
+        int total = q.VotesA + q.VotesB;
+        if (total > 0)
+        {
+            q.PercentA = Math.Round((double)q.VotesA / total * 100, 1);
+            q.PercentB = Math.Round((double)q.VotesB / total * 100, 1);
+        }
+        return q;
     }
 }
