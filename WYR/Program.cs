@@ -3,7 +3,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddHttpClient("WYRAPI", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5216");
+    var apiUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5216";
+    client.BaseAddress = new Uri(apiUrl);
 });
 
 builder.Services.AddRazorPages();
