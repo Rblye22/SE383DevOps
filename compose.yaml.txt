@@ -1,0 +1,32 @@
+services:
+  database:
+    build: ./database
+    container_name: wyr-database
+    environment:
+      MYSQL_ROOT_PASSWORD: AVNS_WddBssIWm2aUrffAyQI
+      MYSQL_DATABASE: defaultdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  wyrapi:
+    build: ./WYRAPI
+    container_name: wyr-api
+    depends_on:
+      - database
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=database;Port=3306;User=root;Password=AVNS_WddBssIWm2aUrffAyQI;Database=defaultdb;"
+    ports:
+      - "5001:8080"
+
+  wyr:
+    build: ./WYR
+    container_name: wyr-frontend
+    depends_on:
+      - wyrapi
+    ports:
+      - "5000:8080"
+
+volumes:
+  db_data:

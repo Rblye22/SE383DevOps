@@ -1,0 +1,24 @@
+﻿@page
+@model ResultsModel
+@{
+    ViewData["Title"] = "Question Results";
+}
+<h1>@ViewData["Title"]</h1>
+<div id="resultsContainer">
+    @foreach (var q in Model.Questions)
+    {
+        <div class="Questions">
+            <div class="options">
+                <div class="option" style="background-color: teal;">
+                    <p>@q.OptionA</p>
+                    <p>@q.PercentA%</p>
+                </div>
+                <div class="or-label">VS</div>
+                <div class="option" style="background-color: purple;">
+                    <p>@q.OptionB</p>
+                    <p>@q.PercentB%</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>

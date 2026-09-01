@@ -1,0 +1,6 @@
+@WYRAPI_HostAddress = http://localhost:5216
+
+GET {{WYRAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

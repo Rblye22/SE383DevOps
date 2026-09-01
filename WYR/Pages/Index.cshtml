@@ -1,0 +1,20 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Would You Rather";
+}
+<h1><br />Would You Rather...</h1>
+<form method="post">
+    <input type="hidden" name="QuestionId" value="@Model.QuestionId" />
+    <div class="Questions">
+        <div class="options">
+            <button type="submit" name="choice" value="A" class="option" id="optionA" style="border:none;">
+                <p>@Model.OptionA</p>
+            </button>
+            <div class="or-label">OR</div>
+            <button type="submit" name="choice" value="B" class="option" id="optionB" style="border:none;">
+                <p>@Model.OptionB</p>
+            </button>
+        </div>
+    </div>
+</form>
