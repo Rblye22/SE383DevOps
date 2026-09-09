@@ -1,0 +1,51 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore WYR.sln
+
+      - name: Build
+        run: dotnet build WYR.sln --no-restore --configuration Release
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore WYR.sln
+
+      - name: Build
+        run: dotnet build WYR.sln --no-restore --configuration Release
+
+      - name: Test frontend
+        run: dotnet test WYR.Tests/WYR.Tests.csproj --configuration Release --no-build --verbosity normal
+
+      - name: Test backend
+        run: dotnet test WYRAPI.Tests/WYRAPI.Tests.csproj --configuration Release --no-build --verbosity normal
