@@ -28,7 +28,7 @@ services:
     environment:
       ApiSettings__BaseUrl: "http://wyrapi:8080"  
     ports:
-      - "5000:8080"
+      - "83:8080"
 
 volumes:
   db_data:
