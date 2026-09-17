@@ -1,0 +1,31 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Build and Test"]
+    types:
+      - completed
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 38.46.230.15
+          username: rblye
+          password: ybFk38vi
+          port: 22
+          script: |
+            if [ -d ~/SE383DevOps ]; then
+              cd ~/SE383DevOps
+              git pull origin main
+            else
+              git clone <repo_url> ~/SE383DevOps
+              cd ~/SE383DevOps
+            fi
+            docker compose up --build -d
