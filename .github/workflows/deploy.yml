@@ -25,7 +25,7 @@ jobs:
               cd ~/SE383DevOps
               git pull origin main
             else
-              git clone <repo_url> ~/SE383DevOps
+              git clone https://github.com/Rblye22/SE383DevOps.git ~/SE383DevOps
               cd ~/SE383DevOps
             fi
             docker compose up --build -d
